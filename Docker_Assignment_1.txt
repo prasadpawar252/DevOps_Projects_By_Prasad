@@ -1,0 +1,51 @@
+pipeline {
+    agent {
+        label "built-in"
+    }
+    stages {
+        stage("clear all container") {
+            steps {
+                sh "sudo yum install docker -y"
+                sh "sudo service docker start"
+                sh "sudo docker kill Q1 || true"
+                sh "sudo docker rm Q1 || true"
+                sh "sudo docker kill Q2 || true"
+                sh "sudo docker rm Q2 || true"
+                sh "sudo docker kill Q3 || true"
+                sh "sudo docker rm Q3 || true"
+            }
+        }
+        stage("Docker image built") {
+            steps {
+                sh "sudo docker pull httpd"
+                sh "sudo docker run -dp 80:80 --name Q1 httpd"
+                sh "sudo docker run -dp 90:80 --name Q2 httpd"
+                sh "sudo docker run -dp 8000:80 --name Q3 httpd"
+            }
+        }
+        stage("git copy Q1") {
+            steps {
+                sh "sudo docker exec Q1 apt update"
+                sh "sudo docker exec Q1 apt install -y git"
+                sh "sudo docker exec Q1 git clone -b 2025-Q1 https://github.com/prasadpawar252/20205_REPO.git /usr/local/apache2/project_2025_main"
+                sh "sudo docker exec Q1 cp /usr/local/apache2/project_2025_main/index.html /usr/local/apache2/htdocs/"
+            }
+        }
+        stage("git copy Q2") {
+            steps {
+                sh "sudo docker exec Q2 apt update"
+                sh "sudo docker exec Q2 apt install -y git"
+                sh "sudo docker exec Q2 git clone -b 2025-Q2 https://github.com/prasadpawar252/20205_REPO.git /usr/local/apache2/project_2025_main"
+                sh "sudo docker exec Q2 cp /usr/local/apache2/project_2025_main/index.html /usr/local/apache2/htdocs/"
+            }
+        }
+        stage("git copy Q3") {
+            steps {
+                sh "sudo docker exec Q3 apt update"
+                sh "sudo docker exec Q3 apt install -y git"
+                sh "sudo docker exec Q3 git clone -b 2025-Q3 https://github.com/prasadpawar252/20205_REPO.git /usr/local/apache2/project_2025_main"
+                sh "sudo docker exec Q3 cp /usr/local/apache2/project_2025_main/index.html /usr/local/apache2/htdocs/"
+            }
+        }
+    }
+}
